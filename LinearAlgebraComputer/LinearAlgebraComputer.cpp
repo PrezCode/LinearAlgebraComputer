@@ -155,9 +155,9 @@ private:
 		solutions.push_back(MatrixDeterminant(tempA) / detBase);
 		solutions.push_back(MatrixDeterminant(tempB) / detBase);
 		if(rows == 3){ solutions.push_back(MatrixDeterminant(tempC) / detBase); }
-		for (size_t i = 0; i < solutions.size(); ++i) {
-			printf("x%d = %f\n", static_cast<int>(i) + 1, solutions[i]);
-		}
+		printf("X: %f\n", solutions[0]);
+		printf("Y: %f\n", solutions[1]);
+		if(rows == 3){ printf("Z: %f\n", solutions[2]); }
 	}
 	void printMatrix(const Matrix2D& A) {
 		printf("\nResulting Matrix:\n");
@@ -174,5 +174,5 @@ private:
 int main() {
 	MatrixSolver solver;
 	solver.RunMatrixSolver();
-	return 0;
+	system("PAUSE");
 }
