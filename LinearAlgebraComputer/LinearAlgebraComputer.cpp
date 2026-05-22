@@ -19,32 +19,39 @@ public:
 	void RunMatrixSolver() {
 		int selection;
 		printf("[Matrix Calculator]\n");
-		std::cout << "1 - Addition\n2 - Subtraction\n3 - Scalar Multiplication\n4 - Determinant\n" << std::endl;
-		printf("Please select an operation:\n");std::cin >> selection;
+		printf("1 - Addition\n2 - Subtraction\n3 - Scalar Multiplication\n4 - Determinant\n5 - Cramer's Rule\n");
+		printf("Please select an operation: ");std::cin >> selection;
 		switch (selection) {
-		case 1:
-			BuildMatrices(2);
-			MatrixAddition(matrix1, matrix2);
-			break;
-		case 2:
-			BuildMatrices(2);
-			MatrixSubtraction(matrix1, matrix2);
-			break;
-		case 3:
-			BuildMatrices(1);
-			double scalar;
-			std::cout << "Enter a scalar value: "; std::cin >> scalar;
-			MatrixScalar(matrix1, scalar);
-			break;
-		case 4:
-			BuildMatrices(1);
-			MatrixDeterminant(matrix1);
-			break;
-		default: printf("Invalid selection. Please select a valid operation.");
-			return;
+			case 1:
+				BuildMatrices(2);
+				MatrixAddition(matrix1, matrix2);
+				printMatrix(matrix1);
+				break;
+			case 2:
+				BuildMatrices(2);
+				MatrixSubtraction(matrix1, matrix2);
+				printMatrix(matrix1);
+				break;
+			case 3:
+				BuildMatrices(1);
+				double scalar;
+				std::cout << "Enter a scalar value: "; std::cin >> scalar;
+				MatrixScalar(matrix1, scalar);
+				printMatrix(matrix1);
+				break;
+			case 4:
+				BuildMatrices(1);
+				printf("Determinant: %f\n", MatrixDeterminant(matrix1));
+				break;
+			case 5:
+				BuildMatrices(1);
+				CramersRule(matrix1);
+				break;
+			default: printf("Invalid selection. Please select a valid operation.");
+				return;
 		}
-		printMatrix(matrix1);
 	}
+private:
 	void BuildMatrices(int num) {
 		size_t rows, cols;
 		std::string rowOfValues;
@@ -65,6 +72,7 @@ public:
 					else { matrix2[i].push_back(temp); }
 				}
 			}
+			std::cout << std::endl;
 		}
 	}
 	void MatrixAddition(Matrix& A, Matrix& B) {
@@ -98,32 +106,60 @@ public:
 			}
 		}
 	};
-	void MatrixDeterminant(Matrix& A) {
+	double MatrixDeterminant(Matrix& A) {
 		size_t rows = A.size();
 		size_t cols = A[0].size();
 		double det{ 0.0 };
-		//Check if Matrix can be made square
+		//Check if Matrix is square
 		if (rows != cols) {
-			std::cout << "Matrix is not Square; Determinant is Not Possible" << std::endl;
-			return;
+			std::cout << "Error: Determinant can only be calculated for square matrices." << std::endl;
+			return 0;
 		}
-		if (rows == 2 && cols == 2) {
-			det = A[0][0] * A[1][1] - A[0][1] * A[1][0];
-			std::cout << "Determinant: " << det << std::endl;
-		}
-		else {
+		if (rows == 2 && cols == 2) { 
+			det = A[0][0] * A[1][1] - A[0][1] * A[1][0]; 
+		} else {
 			Matrix temp;
+			temp.resize(rows);
 			for (int i = 0; i < rows; ++i) {
-				std::vector<double> tempRow;
-				for (int j = 1; j < cols; ++j) {
-					tempRow.push_back(A[i][j] * A[i + 1][j + 1]);
+				for (int j = 0; j < cols; ++j) { temp[i].push_back(A[i][j]); }
+				for (int k = 0; k < rows - 1; ++k) {
+					temp[i].push_back(A[i][k]);
 				}
 			}
-			std::cout << "Determinant: " << det << std::endl;
+			double addProduct{ 1.0 }, subtractProduct{ 1.0 };
+			for (int i = 0; i < rows; ++i) {
+				for (int j = 0; j < rows; ++j) {
+					addProduct *= temp[j][i + j];
+					subtractProduct *= temp[rows - 1 - j][i + j];
+				}
+				det += addProduct - subtractProduct;
+				addProduct = subtractProduct = 1.0;
+			}
 		}
+		return det;
+	}
+	void CramersRule(Matrix& A) { //Currently non-functional, needs to be fixed
+		size_t rows = A.size();
+		Matrix tempBase, tempA, tempB, tempC;
+		double detA{ 0.0 }, x1{ 0.0 }, x2{ 0.0 }, x3{ 0.0 };
+		tempBase.resize(rows); tempA.resize(rows); tempB.resize(rows); tempC.resize(rows);
+		for (int i = 0; i < rows; ++i) {
+			for (int j = 0; j < rows + 1; ++j) {
+				tempBase[i][j] = A[i][j];
+				tempA[i][0] = A[i][rows + 1];
+				tempB[i][1] = A[i][rows + 1];
+				if(A.size() == 3){ tempC[i][2] = A[i][rows + 1]; }
+			}
+		}
+		detA = MatrixDeterminant(tempBase);
+		x1 = MatrixDeterminant(tempA) / detA;
+		x2 = MatrixDeterminant(tempB) / detA;
+		if (A.size() == 3) { x3 = MatrixDeterminant(tempC) / detA; }
+		printf("Solutions:\n");
+		std::cout << "x1: " << x1 << "\nx2: " << x2 << "\nx3: " << x3 << std::endl;
 	}
 	void printMatrix(const Matrix& A) {
-		printf("Resulting Matrix:\n");
+		printf("\nResulting Matrix:\n");
 		for (const auto& row : A) {
 			printf("| ");
 			for (double val : row) {
