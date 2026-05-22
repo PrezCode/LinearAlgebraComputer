@@ -8,12 +8,13 @@
 #include <array>
 #include <sstream>
 
-using Matrix = std::vector<std::vector<double>>;
+using Matrix2D = std::vector<std::vector<double>>;
+using Matrix1D = std::vector<double>;
 
 enum VariableLetter{a, b, c, d};
 class MatrixSolver {
 private:
-	Matrix matrix1, matrix2;
+	Matrix2D matrix1, matrix2;
 public:
 	MatrixSolver() {}
 	void RunMatrixSolver() {
@@ -75,7 +76,7 @@ private:
 			std::cout << std::endl;
 		}
 	}
-	void MatrixAddition(Matrix& A, Matrix& B) {
+	void MatrixAddition(Matrix2D& A, Matrix2D& B) {
 		//Check if the dimensions of A and B are the same
 		if (A.size() != B.size() || A[0].size() != B[0].size()) {
 			std::cout << "Error: Matrices must have the same dimensions for addition." << std::endl;
@@ -87,7 +88,7 @@ private:
 			}
 		}
 	};
-	void MatrixSubtraction(Matrix& A, Matrix& B) {
+	void MatrixSubtraction(Matrix2D& A, Matrix2D& B) {
 		//Check if the dimensions of A and B are the same
 		if (A.size() != B.size() || A[0].size() != B[0].size()) {
 			std::cout << "Error: Matrices must have the same dimensions for subtraction." << std::endl;
@@ -99,14 +100,14 @@ private:
 			}
 		}
 	}
-	void MatrixScalar(Matrix& A, double scalar) {
+	void MatrixScalar(Matrix2D& A, double scalar) {
 		for (int i = 0; i < A.size(); ++i) {
 			for (int j = 0; j < A[0].size(); ++j) {
 				A[i][j] *= scalar;
 			}
 		}
 	};
-	double MatrixDeterminant(Matrix& A) {
+	double MatrixDeterminant(Matrix2D& A) { //Only handles 2x2 and 3x3 matrices for now, will add more in the future
 		size_t rows = A.size();
 		size_t cols = A[0].size();
 		double det{ 0.0 };
@@ -118,7 +119,7 @@ private:
 		if (rows == 2 && cols == 2) { 
 			det = A[0][0] * A[1][1] - A[0][1] * A[1][0]; 
 		} else {
-			Matrix temp;
+			Matrix2D temp;
 			temp.resize(rows);
 			for (int i = 0; i < rows; ++i) {
 				for (int j = 0; j < cols; ++j) { temp[i].push_back(A[i][j]); }
@@ -138,27 +139,27 @@ private:
 		}
 		return det;
 	}
-	void CramersRule(Matrix& A) { //Currently non-functional, needs to be fixed
+	void CramersRule(Matrix2D& A) { 
 		size_t rows = A.size();
-		Matrix tempBase, tempA, tempB, tempC;
+		Matrix2D tempBase(A), tempA(A), tempB(A), tempC(A);
 		double detA{ 0.0 }, x1{ 0.0 }, x2{ 0.0 }, x3{ 0.0 };
-		tempBase.resize(rows); tempA.resize(rows); tempB.resize(rows); tempC.resize(rows);
 		for (int i = 0; i < rows; ++i) {
-			for (int j = 0; j < rows + 1; ++j) {
-				tempBase[i][j] = A[i][j];
-				tempA[i][0] = A[i][rows + 1];
-				tempB[i][1] = A[i][rows + 1];
-				if(A.size() == 3){ tempC[i][2] = A[i][rows + 1]; }
-			}
+			tempBase[i].pop_back();
+			tempA[i][0] = A[i][rows]; tempA[i].pop_back();
+			tempB[i][1] = A[i][rows]; tempB[i].pop_back();
+			if(rows == 3){tempC[i][2] = A[i][rows]; tempC[i].pop_back();}
 		}
-		detA = MatrixDeterminant(tempBase);
-		x1 = MatrixDeterminant(tempA) / detA;
-		x2 = MatrixDeterminant(tempB) / detA;
-		if (A.size() == 3) { x3 = MatrixDeterminant(tempC) / detA; }
 		printf("Solutions:\n");
-		std::cout << "x1: " << x1 << "\nx2: " << x2 << "\nx3: " << x3 << std::endl;
+		Matrix1D solutions;
+		double detBase = MatrixDeterminant(tempBase);
+		solutions.push_back(MatrixDeterminant(tempA) / detBase);
+		solutions.push_back(MatrixDeterminant(tempB) / detBase);
+		if(rows == 3){ solutions.push_back(MatrixDeterminant(tempC) / detBase); }
+		for (size_t i = 0; i < solutions.size(); ++i) {
+			printf("x%d = %f\n", static_cast<int>(i) + 1, solutions[i]);
+		}
 	}
-	void printMatrix(const Matrix& A) {
+	void printMatrix(const Matrix2D& A) {
 		printf("\nResulting Matrix:\n");
 		for (const auto& row : A) {
 			printf("| ");
