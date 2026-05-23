@@ -20,7 +20,7 @@ public:
 	void RunMatrixSolver() {
 		int selection;
 		printf("[Matrix Calculator]\n");
-		printf("1 - Addition\n2 - Subtraction\n3 - Scalar Multiplication\n4 - Determinant\n5 - Cramer's Rule\n");
+		printf(" 1 - Addition\n 2 - Subtraction\n 3 - Scalar Multiplication\n 4 - Determinant\n 5 - Cramer's Rule\n 6 - Matrix Multiplication\n");
 		printf("Please select an operation: ");std::cin >> selection;
 		switch (selection) {
 			case 1:
@@ -48,7 +48,11 @@ public:
 				BuildMatrices(1);
 				CramersRule(matrix1);
 				break;
-			default: printf("Invalid selection. Please select a valid operation.");
+			case 6:
+				BuildMatrices(2);
+				MatrixMultiplication(matrix1, matrix2);
+				break;
+			default: printf("Error: This option does not exist.");
 				return;
 		}
 	}
@@ -70,7 +74,7 @@ private:
 				double temp;
 				while (ss >> temp) {
 					if (k == 0) { matrix1[i].push_back(temp); }
-					else { matrix2[i].push_back(temp); }
+						else { matrix2[i].push_back(temp); }
 				}
 			}
 			std::cout << std::endl;
@@ -80,11 +84,11 @@ private:
 		//Check if the dimensions of A and B are the same
 		if (A.size() != B.size() || A[0].size() != B[0].size()) {
 			std::cout << "Error: Matrices must have the same dimensions for addition." << std::endl;
-		} else {
-			for (int i = 0; i < A.size(); ++i) {
-				for (int j = 0; j < A[0].size(); ++j) {
-					A[i][j] += B[i][j];
-				}
+			return;
+		}
+		for (int i = 0; i < A.size(); ++i) {
+			for (int j = 0; j < A[0].size(); ++j) {
+				A[i][j] += B[i][j];
 			}
 		}
 	};
@@ -92,11 +96,11 @@ private:
 		//Check if the dimensions of A and B are the same
 		if (A.size() != B.size() || A[0].size() != B[0].size()) {
 			std::cout << "Error: Matrices must have the same dimensions for subtraction." << std::endl;
-		} else {
-			for (int i = 0; i < A.size(); ++i) {
-				for (int j = 0; j < A[0].size(); ++j) {
-					A[i][j] -= B[i][j];
-				}
+			return;
+		}
+		for (int i = 0; i < A.size(); ++i) {
+			for (int j = 0; j < A[0].size(); ++j) {
+				A[i][j] -= B[i][j];
 			}
 		}
 	}
@@ -158,6 +162,23 @@ private:
 		printf("X: %f\n", solutions[0]);
 		printf("Y: %f\n", solutions[1]);
 		if(rows == 3){ printf("Z: %f\n", solutions[2]); }
+	}
+	void MatrixMultiplication(Matrix2D& A, Matrix2D& B) {
+		size_t Arows = A.size(), Acols = A[0].size(), Bcols = B[0].size();
+		if (Arows != Bcols) { std::cout << "Error: The dimensions of the matrices are incompatable." << std::endl; return; }
+		Matrix2D matrixProduct;
+		matrixProduct.resize(Arows);
+		for (int i = 0; i < Arows; ++i) {
+			for (int j = 0; j < Bcols; ++j) {
+				double sum{ 0.0 };
+				for (int k = 0; k < Acols; ++k) {
+					sum += A[i][k] * B[k][j];
+				}
+				matrixProduct[i].push_back(sum);
+			}
+		}
+		
+		printMatrix(matrixProduct);
 	}
 	void printMatrix(const Matrix2D& A) {
 		printf("\nResulting Matrix:\n");
