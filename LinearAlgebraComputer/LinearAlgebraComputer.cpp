@@ -20,7 +20,7 @@ public:
 	void RunMatrixSolver() {
 		int selection;
 		printf("[Matrix Calculator]\n");
-		printf(" 1 - Addition\n 2 - Subtraction\n 3 - Scalar Multiplication\n 4 - Determinant\n 5 - Cramer's Rule\n 6 - Matrix Multiplication\n");
+		printf(" 1 - Addition\n 2 - Subtraction\n 3 - Scalar Multiplication\n 4 - Determinant\n 5 - Cramer's Rule\n 6 - Matrix Multiplication\n 7 - Gaussian Elimination\n 8 - Transpose\n");
 		printf("Please select an operation: ");std::cin >> selection;
 		switch (selection) {
 			case 1:
@@ -52,6 +52,13 @@ public:
 				BuildMatrices(2);
 				MatrixMultiplication(matrix1, matrix2);
 				break;
+			case 7: 
+				BuildMatrices(1);
+				GaussianElimination(matrix1);
+				break;
+			case 8: 
+				BuildMatrices(1);
+				MatrixTranspose(matrix1);
 			default: printf("Error: This option does not exist.");
 				return;
 		}
@@ -180,6 +187,18 @@ private:
 		
 		printMatrix(matrixProduct);
 	}
+	void GaussianElimination(Matrix2D& A) {
+		size_t rows = A.size(), cols = A[0].size();
+		for (int i = 0; i < rows; ++i) {
+			for (int j = i + 1; j < rows; ++j) {
+				double factor = A[j][i] / A[i][i];
+				for (int k = i; k < cols; ++k) {
+					A[j][k] -= factor * A[i][k];
+				}
+			}
+		}
+		printMatrix(A);
+	}
 	void printMatrix(const Matrix2D& A) {
 		printf("\nResulting Matrix:\n");
 		for (const auto& row : A) {
@@ -190,6 +209,17 @@ private:
 			printf("|\n");
 		}
 	}
+	void MatrixTranspose(Matrix2D& A) {	//Only able to do square matrices right now.
+		size_t rows = A.size();
+		Matrix2D temp(A);
+		for (int i = 0; i < rows; ++i) {
+			for (int j = 0; j < rows; ++j) {
+				A[i][j] = temp[j][i];
+			}
+		}
+		printMatrix(A);
+	};
+
 };
 
 int main() {
